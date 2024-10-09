@@ -1,8 +1,6 @@
-package csw.t1.csw.entity;
+package csw.t1.csw.entities;
 
 import jakarta.persistence.*;
-
-import java.util.UUID;
 
 @Entity
 @Table(name = "tenants")

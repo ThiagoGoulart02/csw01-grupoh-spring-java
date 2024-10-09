@@ -1,4 +1,4 @@
-package csw.t1.csw.config;
+package csw.t1.csw.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

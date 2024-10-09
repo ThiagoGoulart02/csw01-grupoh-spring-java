@@ -1,4 +1,4 @@
-package csw.t1.csw.controller;
+package csw.t1.csw.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
