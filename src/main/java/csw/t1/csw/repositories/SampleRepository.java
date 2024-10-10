@@ -1,4 +1,4 @@
-package csw.t1.csw.repository;
+package csw.t1.csw.repositories;
 
 import csw.t1.csw.entity.Sample;
 import org.springframework.data.jpa.repository.JpaRepository;
