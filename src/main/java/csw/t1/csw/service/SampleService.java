@@ -2,7 +2,7 @@ package csw.t1.csw.service;
 
 import csw.t1.csw.dto.sample.RequestSampleDTO;
 import csw.t1.csw.dto.sample.ResponseSampleDTO;
-import csw.t1.csw.entity.Sample;
+import csw.t1.csw.entities.Sample;
 import csw.t1.csw.repositories.SampleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package csw.t1.csw.entity;
+package csw.t1.csw.entities;
 
 import csw.t1.csw.dto.sample.RequestSampleDTO;
 import jakarta.persistence.*;
