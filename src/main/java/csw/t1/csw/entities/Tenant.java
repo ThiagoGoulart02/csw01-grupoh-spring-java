@@ -1,11 +1,19 @@
 package csw.t1.csw.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "tenants")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Tenant {
 
     @Id
@@ -23,13 +31,4 @@ public class Tenant {
             nullable = false)
     private String specificConfiguration;
 
-    /*@Column(name = "roles")
-    private Set<Role> role;
-
-    public enum Role {
-        COMPRADOR,
-        VENDEDOR,
-        ORGANIZADOR,
-        ADMINISTRADOR
-    }*/
 }

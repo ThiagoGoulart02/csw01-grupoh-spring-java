@@ -1,11 +1,20 @@
 package csw.t1.csw.entities;
 
+import csw.t1.csw.enums.TicketStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "tickets")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ticket {
 
     @Id
@@ -18,10 +27,10 @@ public class Ticket {
             nullable = false)
     private Event event;
 
-    /*@ManyToOne
-    @JoinColumn(name = "tenant_id",  (n tem o relacionamento)
+    @ManyToOne
+    @JoinColumn(name = "tenant_id",
             nullable = false)
-    private Tenant tenant;*/
+    private Tenant tenant;
 
     @Column(name = "original_price",
             precision = 6,
@@ -40,10 +49,4 @@ public class Ticket {
 
     @Column(nullable = false)
     private TicketStatus status;
-
-    public enum TicketStatus {
-        DISPONIVEL,
-        RESERVADO,
-        VENDIDO
-    }
 }

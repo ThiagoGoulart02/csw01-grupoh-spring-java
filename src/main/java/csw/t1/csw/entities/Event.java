@@ -1,11 +1,21 @@
 package csw.t1.csw.entities;
 
+import csw.t1.csw.dto.event.RequestEventDTO;
+import csw.t1.csw.enums.EventType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "events")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
 
     @Id
@@ -13,10 +23,10 @@ public class Event {
     @Column(name = "event_id")
     private Long eventId;
 
-
-    /*@JoinColumn(name = "tenant_id", (n tem relacionamento)
+    @ManyToOne
+    @JoinColumn(name = "tenant_id",
             nullable = false)
-    private Tenant tenant;*/
+    private Tenant tenant;
 
     @Column(name = "event_name",
             nullable = false)
@@ -32,9 +42,5 @@ public class Event {
             nullable = false)
     private LocalDateTime dateTime;
 
-    public enum EventType {
-        FESTA,
-        SHOW,
-        TEATRO
-    }
+
 }
