@@ -1,9 +1,18 @@
 package csw.t1.csw.entities;
 
+import csw.t1.csw.dto.user.RequestUserDTO;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -23,8 +32,16 @@ public class User {
             nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "firebase_token",
+            nullable = false)
     private String firebaseToken;
 
     // config de privacidade
+
+    public User(RequestUserDTO dto, Tenant tenant) {
+        this.tenant = tenant;
+        this.name = dto.name();
+        this.email = dto.email();
+        this.firebaseToken = dto.firebaseToken();
+    }
 }

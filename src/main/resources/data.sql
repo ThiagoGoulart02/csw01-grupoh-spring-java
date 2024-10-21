@@ -1,3 +1,6 @@
+DELETE FROM transactions;
+DELETE FROM tickets;
+DELETE FROM users;
 DELETE FROM events;
 DELETE FROM tenants;
 

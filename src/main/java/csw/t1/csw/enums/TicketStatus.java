@@ -1,5 +1,7 @@
 package csw.t1.csw.enums;
 
+import csw.t1.csw.entities.Ticket;
+
 import java.util.Arrays;
 
 public enum TicketStatus {
@@ -13,5 +15,9 @@ public enum TicketStatus {
                         .equalsIgnoreCase(type))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static boolean isTicketAvailable(Ticket ticket) {
+        return ticket.getStatus() == TicketStatus.DISPONIVEL;
     }
 }

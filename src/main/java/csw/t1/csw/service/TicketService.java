@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -33,27 +34,62 @@ public class TicketService {
     public ResponseEntity<ResponseTicketDTO> createTicket(RequestTicketDTO dto) {
         var event = eventRepository.findById(dto.eventId())
                 .orElse(null);
-        var tenant = tenantRepository.findById(dto.eventId())
+        var tenant = tenantRepository.findById(dto.tenantId())
                 .orElse(null);
-        var user = userRepository.findById(dto.eventId())
+        var user = userRepository.findById(dto.userId())
                 .orElse(null);
 
         TicketStatus status = TicketStatus.findTicketType(dto.status());
 
-        if(event != null && tenant != null &&
-                user != null && status != null) {
+        if (event != null && tenant != null &&
+                user != null && status != null &&
+                dto.originalPrice().compareTo(BigDecimal.ZERO) >= 0) {
             Ticket ticket = new Ticket();
             ticket.setEvent(event);
             ticket.setTenant(tenant);
             ticket.setOriginalPrice(dto.originalPrice());
+            ticket.setUser(user);
+            ticket.setUniqueVerificationCode(dto.uniqueVerificationCode());
             ticket.setStatus(status);
-            return
+            repository.save(ticket);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ResponseTicketDTO.builder()
+                            .ticketId(ticket.getTicketId())
+                            .eventId(ticket.getEvent().getEventId())
+                            .tenantId(ticket.getTenant().getTenantId())
+                            .originalPrice(ticket.getOriginalPrice())
+                            .userId(ticket.getUser().getUserId())
+                            .uniqueVerificationCode(ticket.getUniqueVerificationCode())
+                            .status(String.valueOf(ticket.getStatus())
+                            ).build()
+                    );
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
     public ResponseEntity<List<ResponseTicketDTO>> getTicketsByEvent(Long id) {
-        return null;
+        var event = eventRepository.findById(id).orElse(null);
+
+        if (event != null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(repository.findByEvent(event)
+                            .stream()
+                            .map(ticket -> ResponseTicketDTO.builder()
+                                    .ticketId(ticket.getTicketId())
+                                    .eventId(ticket.getEvent().getEventId())
+                                    .tenantId(ticket.getTenant().getTenantId())
+                                    .originalPrice(ticket.getOriginalPrice())
+                                    .userId(ticket.getUser().getUserId())
+                                    .uniqueVerificationCode(ticket.getUniqueVerificationCode())
+                                    .status(String.valueOf(ticket.getStatus())
+                                    )
+                                    .build()
+                            )
+                            .toList()
+                    );
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 }

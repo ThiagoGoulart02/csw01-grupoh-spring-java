@@ -1,12 +1,22 @@
 package csw.t1.csw.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import csw.t1.csw.enums.TransactionStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Transaction {
 
     @Id
@@ -14,9 +24,10 @@ public class Transaction {
     @Column(name = "transaction_id")
     private Long transactionId;
 
-    /*@JoinColumn(name = "tenant_id",  (n tem relacionamento)
+    @ManyToOne
+    @JoinColumn(name = "tenant_id",
                 nullable = false)
-    private Tenant tenant;*/
+    private Tenant tenant;
 
     @ManyToOne
     @JoinColumn(name = "user_id",
@@ -40,10 +51,4 @@ public class Transaction {
 
     @Column(nullable = false)
     private TransactionStatus status;
-
-    public enum TransactionStatus {
-        PENDENTE,
-        CNCLUIDA,
-        CANCELADA
-    }
 }
