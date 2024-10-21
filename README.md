@@ -1,8 +1,18 @@
 # Trabalho T1 - Construção de Software
 
-Alunos: Marcello Marcon, Otávio Cunha, Rodrigo Lopes, Thiago Goulart\
-Grupo: H\
+## Alunos do Grupo H
+
+- Marcello Marcon
+- Otávio Cunha
+- Rodrigo Lopes
+- Thiago Goulart
+  
 Linguagem e Framework: Java/Spring
+
+## Data model
+
+![Diagrama do banco de dados](./assets/modelo_banco.png)
+
 
 ## Rodando a aplicação:
 
@@ -11,3 +21,5 @@ Linguagem e Framework: Java/Spring
 3. Entrar na pasta do docker: cd docker
 4. Rodar o docker (necessário ter o docker instalado): docker compose up
 5. Abrir a aplicação em algum editor e rodar ela
+
+6. 
