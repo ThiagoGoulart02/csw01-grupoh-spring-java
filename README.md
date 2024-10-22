@@ -67,8 +67,8 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    ```
 
 5. **Para rodar o Terraform**
-
-   Basta entrar na pasta infra do projeto e rodar o script de ec2_setup
+   É necessário estar com as credentials da aws devidamente configuradas na sua máquina, isso implica em, entrar na pasta .aws e trocar as credencias com base no launcher aws.
+   Depois, basta entrar na pasta infra do projeto e rodar o script de ec2_setup
       ```bash
    cd infra
    ```
