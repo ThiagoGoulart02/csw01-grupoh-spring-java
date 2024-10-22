@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>csw.t1</groupId>
 	<artifactId>csw</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>csw</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
