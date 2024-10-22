@@ -23,7 +23,40 @@
 hs_err_pid*
 replay_pid*
 
+# Build directories
 /target/
 
+# IDE-specific directories
 .idea/
-.vscode/
+/.vscode/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Crash log for Terraform
+crash.log
+
+# Terraform variable override files
+*.tfvars
+
+# Sensitive data files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform plan files
+*.tfplan
+
+# Terraform provider directories
+.terraform/
+
+# Lock file
+.terraform.lock.hcl
+
+# Local environment variables
+.env
+
+# Ignore todos os arquivos PEM
+*.pem
