@@ -3,14 +3,14 @@ provider "aws" {
 }
 
 resource "aws_instance" "ec2" {
-  ami = "ami-0866a3c8686eaeeba"
-  instance_type = "t2.micro"
-
+  ami                    = "ami-0866a3c8686eaeeba"
+  instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.api_access.id]
-  key_name = aws_key_pair.key_pair.key_name
+  key_name               = aws_key_pair.key_pair.key_name
   tags = {
     Name = "ec2"
   }
+  user_data = file("${path.module}/user_data.sh")
 }
 resource "aws_security_group" "api_access" {
   name        = "API-security-group-T1"
@@ -37,9 +37,9 @@ resource "aws_security_group" "api_access" {
   # Regra de entrada para HTTPS (porta 443)
   ingress {
     description = "HTTPS"
-    from_port = 443
-    to_port   = 443
-    protocol  = "tcp"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -88,8 +88,8 @@ resource "aws_key_pair" "key_pair" {
 }
 
 resource "local_file" "my_key_pem" {
-  filename = "${path.module}/ec2-key.pem"
-  content  = tls_private_key.my_key.private_key_pem
+  filename        = "${path.module}/ec2-key.pem"
+  content         = tls_private_key.my_key.private_key_pem
   file_permission = "0400"
 }
 
