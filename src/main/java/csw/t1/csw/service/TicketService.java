@@ -1,5 +1,6 @@
 package csw.t1.csw.service;
 
+import csw.t1.csw.dto.ticket.RequestCheckTicketDTO;
 import csw.t1.csw.dto.ticket.RequestTicketDTO;
 import csw.t1.csw.dto.ticket.ResponseTicketDTO;
 import csw.t1.csw.entities.Ticket;
@@ -92,4 +93,28 @@ public class TicketService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+    public ResponseEntity<ResponseTicketDTO> checkTicket(RequestCheckTicketDTO dto) {
+        var ticket = repository.findById(dto.ticketId()).orElse(null);
+
+
+        if (ticket != null && ticket.getStatus() == TicketStatus.VENDIDO) {
+            ticket.setStatus(TicketStatus.USADO);
+            repository.save(ticket);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ResponseTicketDTO.builder()
+                            .ticketId(ticket.getTicketId())
+                            .eventId(ticket.getEvent().getEventId())
+                            .tenantId(ticket.getTenant().getTenantId())
+                            .originalPrice(ticket.getOriginalPrice())
+                            .userId(ticket.getUser().getUserId())
+                            .uniqueVerificationCode(ticket.getUniqueVerificationCode())
+                            .status(String.valueOf(ticket.getStatus()))
+                            .build()
+                    );
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    }
+
 }

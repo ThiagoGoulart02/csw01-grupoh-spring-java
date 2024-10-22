@@ -4,9 +4,12 @@ import csw.t1.csw.dto.event.RequestEventByAdminDTO;
 import csw.t1.csw.dto.event.RequestEventDTO;
 import csw.t1.csw.dto.event.ResponseEventDTO;
 import csw.t1.csw.entities.Event;
+import csw.t1.csw.entities.Ticket;
 import csw.t1.csw.enums.EventType;
 import csw.t1.csw.repositories.EventRepository;
 import csw.t1.csw.repositories.TenantRepository;
+import csw.t1.csw.repositories.TicketRepository;
+import csw.t1.csw.repositories.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,12 @@ public class EventService {
 
     @Autowired
     private TenantRepository tenantRepository;
+
+    @Autowired
+    private TicketRepository ticketRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public ResponseEntity<ResponseEventDTO> createEvent(RequestEventDTO dto) {
         var tenant = tenantRepository.findById(dto.tenant())
@@ -132,7 +141,7 @@ public class EventService {
 
             if (dto.type() != null) {
                 EventType type = EventType.findEventType(dto.type());
-                if(type == null) {
+                if (type == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                 } else {
                     event.setType(type);
@@ -157,12 +166,14 @@ public class EventService {
         var tenant = tenantRepository.findById(adminId).orElse(null);
 
         if (event != null && tenant != null && event.getTenant() == tenant) {
+
+            List<Ticket> tickets = ticketRepository.findByEvent(event);
+            tickets.forEach(ticketToDelete -> transactionRepository.deleteByTicket(ticketToDelete));
+            tickets.forEach(ticketToDelete -> ticketRepository.delete(ticketToDelete));
             repository.delete(event);
 
             return ResponseEntity.status(HttpStatus.OK).body(true);
         }
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
     }
-
 }

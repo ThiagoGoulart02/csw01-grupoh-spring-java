@@ -7,7 +7,8 @@ import java.util.Arrays;
 public enum TicketStatus {
     DISPONIVEL,
     RESERVADO,
-    VENDIDO;
+    VENDIDO,
+    USADO;
 
     public static TicketStatus findTicketType(String type) {
         return Arrays.stream(TicketStatus.values())
