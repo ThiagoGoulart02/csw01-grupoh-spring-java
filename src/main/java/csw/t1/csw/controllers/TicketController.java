@@ -33,4 +33,10 @@ public class TicketController {
     public ResponseEntity<ResponseTicketDTO> checkTicket(@RequestBody @Valid RequestCheckTicketDTO dto) {
         return service.checkTicket(dto);
     }
+
+    @GetMapping("/get-tickets/by-user/{userId}")
+    public ResponseEntity<List<ResponseTicketDTO>> getTicketsByUser(@PathVariable Long userId) {
+        return service.getTicketsByUser(userId);
+    }
+
 }

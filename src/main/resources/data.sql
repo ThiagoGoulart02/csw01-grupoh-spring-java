@@ -1,3 +1,4 @@
+DELETE FROM notification_preferences;
 DELETE FROM transactions;
 DELETE FROM tickets;
 DELETE FROM users;

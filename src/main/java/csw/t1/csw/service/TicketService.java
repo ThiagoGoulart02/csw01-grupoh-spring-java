@@ -5,10 +5,7 @@ import csw.t1.csw.dto.ticket.RequestTicketDTO;
 import csw.t1.csw.dto.ticket.ResponseTicketDTO;
 import csw.t1.csw.entities.Ticket;
 import csw.t1.csw.enums.TicketStatus;
-import csw.t1.csw.repositories.EventRepository;
-import csw.t1.csw.repositories.TenantRepository;
-import csw.t1.csw.repositories.TicketRepository;
-import csw.t1.csw.repositories.UserRepository;
+import csw.t1.csw.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +28,9 @@ public class TicketService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public ResponseEntity<ResponseTicketDTO> createTicket(RequestTicketDTO dto) {
         var event = eventRepository.findById(dto.eventId())
@@ -92,6 +92,32 @@ public class TicketService {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+    }
+
+    public ResponseEntity<List<ResponseTicketDTO>> getTicketsByUser(Long userId) {
+        var user = userRepository.findById(userId).orElse(null);
+
+        if (user != null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(transactionRepository.findByBuyer(user)
+                            .stream()
+                            .map(transaction -> ResponseTicketDTO.builder()
+                                    .ticketId(transaction.getTicket().getTicketId())
+                                    .eventId(transaction.getTicket().getEvent().getEventId())
+                                    .tenantId(transaction.getTicket().getTenant().getTenantId())
+                                    .originalPrice(transaction.getTicket().getOriginalPrice())
+                                    .userId(transaction.getTicket().getUser().getUserId())
+                                    .uniqueVerificationCode(transaction.getTicket().getUniqueVerificationCode())
+                                    .status(String.valueOf(transaction.getTicket().getStatus()))
+                                    .build())
+                            .toList()
+                    );
+
+
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
     }
 
     public ResponseEntity<ResponseTicketDTO> checkTicket(RequestCheckTicketDTO dto) {

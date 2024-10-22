@@ -1,5 +1,6 @@
 package csw.t1.csw.service;
 
+import csw.t1.csw.dto.ticket.ResponseTicketDTO;
 import csw.t1.csw.dto.transaction.RequestTransactionDTO;
 import csw.t1.csw.dto.transaction.ResponseTransactionDTO;
 import csw.t1.csw.dto.transaction.TransactionMapper;
@@ -67,12 +68,12 @@ public class TransactionService {
         }
     }
 
-    public ResponseEntity<ResponseTransactionDTO> updateTransactionStatus(Long id, String status){
+    public ResponseEntity<ResponseTransactionDTO> updateTransactionStatus(Long id, String status) {
         var transaction = repository.findById(id).orElse(null);
 
         Ticket ticket;
 
-        if(transaction != null && transaction.getStatus() == TransactionStatus.PENDENTE) {
+        if (transaction != null && transaction.getStatus() == TransactionStatus.PENDENTE) {
             switch (status.toUpperCase()) {
                 case "OK":
                     transaction.setStatus(TransactionStatus.CONCLUIDA);
@@ -94,6 +95,30 @@ public class TransactionService {
                     break;
             }
         }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    }
+
+    public ResponseEntity<ResponseTicketDTO> refundTicket(Long ticketId) {
+        var ticket = ticketRepository.findById(ticketId).orElse(null);
+        var transaction = repository.findByTicket(ticket);
+
+        if (ticket != null && transaction != null) {
+            repository.delete(transaction);
+            ticket.setStatus(TicketStatus.DISPONIVEL);
+            ticketRepository.save(ticket);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ResponseTicketDTO.builder()
+                            .ticketId(ticketId)
+                            .eventId(ticket.getEvent().getEventId())
+                            .tenantId(ticket.getTenant().getTenantId())
+                            .originalPrice(ticket.getOriginalPrice())
+                            .userId(ticket.getUser().getUserId())
+                            .uniqueVerificationCode(ticket.getUniqueVerificationCode())
+                            .status(String.valueOf(ticket.getStatus()))
+                            .build()
+                    );
+        }
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
 

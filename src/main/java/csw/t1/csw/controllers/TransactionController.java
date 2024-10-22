@@ -1,5 +1,6 @@
 package csw.t1.csw.controllers;
 
+import csw.t1.csw.dto.ticket.ResponseTicketDTO;
 import csw.t1.csw.dto.transaction.RequestTransactionDTO;
 import csw.t1.csw.dto.transaction.ResponseTransactionDTO;
 import csw.t1.csw.service.TransactionService;
@@ -26,6 +27,11 @@ public class TransactionController {
     public ResponseEntity<ResponseTransactionDTO> updateTransactionStatus(@PathVariable Long id,
                                                                           @PathVariable String status) {
         return service.updateTransactionStatus(id, status);
+    }
+
+    @PatchMapping("/refund/{ticketId}")
+    public ResponseEntity<ResponseTicketDTO> refundTicket(@PathVariable Long ticketId) {
+        return service.refundTicket(ticketId);
     }
 
 }
