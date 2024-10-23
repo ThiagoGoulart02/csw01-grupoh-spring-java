@@ -62,12 +62,9 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
 
 ### 📝 Observação
 
-- Certifique-se de que o **Docker** está instalado corretamente em sua máquina para evitar problemas na execução.
-- Após rodar o Docker, você pode acessar a aplicação através do endereço fornecido no terminal.
+Para acessar o Swagger tem que pegar o Ip público da Ec2 e utilizar o protocolo http da seguinte forma
+
+http://IpPublico:8080/swagger-ui/index.html
 
 ---
 
-## 🔗 Links Úteis
-
-- [Documentação do Docker](https://docs.docker.com/get-started/)
-- [Guia de Instalação do Spring Framework](https://spring.io/guides)
