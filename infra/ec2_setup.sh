@@ -23,3 +23,4 @@ chmod 400 "$PEM_FILE"
 echo "Conectando à instância EC2 via SSH..."
 ssh -i "$PEM_FILE" -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP
 
+# ssh -i "ec2-kem.pem" -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP
