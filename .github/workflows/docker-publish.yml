@@ -1,0 +1,33 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches:
+      - main  # Executa o workflow quando há um push no branch 'main'
+  pull_request:
+    branches:
+      - main  # Executa o workflow para pull requests no branch 'main'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout do código
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Configurar autenticação do Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 3: Build da imagem Docker
+      - name: Build Docker image
+        run: docker build -t rodrigolopesmichalski/csw01-grupoh-spring-java:latest .
+
+      # Step 4: Push da imagem para o Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: docker push rodrigolopesmichalski/csw01-grupoh-spring-java:latest
