@@ -34,4 +34,5 @@ jobs:
           aws-region: us-east-1  # Ajuste para a região correta se necessário
 
       - name: Deploy to AWS Lambda
-        run: aws lambda update-function-code --function-name my-lambda-function --zip-file fileb://my-app.zip
+        run: aws lambda update-function-code --function-name csw01-grupoh-spring-java --zip-file fileb://my-app.zip
+
