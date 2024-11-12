@@ -49,6 +49,8 @@ resource "aws_instance" "ec2" {
 
               # Build Docker image
               sudo docker compose up -d
+
+
               EOF
 
 }
@@ -114,6 +116,31 @@ resource "aws_security_group" "api_access" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "csw01-grupoh-spring-java"
+
+  tags = {
+    Name        = "S3"
+    Environment = "Production"
+  }
+}
+
+# Exemplo de política de bucket para permitir acesso público de leitura (ajuste conforme necessário)
+resource "aws_s3_bucket_policy" "bucket_policy" {
+  bucket = aws_s3_bucket.my_bucket.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.my_bucket.arn}/*"
+      }
+    ]
+  })
 }
 
 # Criação da ssh keypair diretamente no terraform

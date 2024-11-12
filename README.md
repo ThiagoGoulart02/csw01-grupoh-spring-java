@@ -42,31 +42,22 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    git clone https://github.com/ThiagoGoulart02/csw01-grupoh-spring-java.git
    ```
 
-2. **Entrar na pasta do projeto**
+2. **Entrar na pasta do projeto de infra**
 
    Após o clone, navegue até o diretório do projeto:
 
    ```bash
-   cd csw01-grupoh-spring-java
+   cd csw01-grupoh-spring-java/infra
    ```
+3. **Rodar o script ec2_setup.sh**
 
-3. **Navegar até a pasta Docker**
-
-   Dentro do projeto, acesse a pasta específica que contém os arquivos Docker:
+   Certifique-se de que o terraform está instalado e, em seguida, inicie a aplicação com:
 
    ```bash
-   cd docker
+   .\ec2_setup.sh
    ```
 
-4. **Rodar o Docker Compose**
-
-   Certifique-se de que o Docker está instalado e, em seguida, inicie a aplicação com:
-
-   ```bash
-   docker-compose up
-   ```
-
-5. **Para rodar o Terraform**
+4. **Para rodar o Terraform**
    É necessário estar com as credentials da aws devidamente configuradas na sua máquina, isso implica em, entrar na pasta .aws e trocar as credencias com base no launcher aws.
    Depois, basta entrar na pasta infra do projeto e rodar o script de ec2_setup
       ```bash
