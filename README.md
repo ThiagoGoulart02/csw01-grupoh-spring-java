@@ -49,6 +49,7 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    ```bash
    cd csw01-grupoh-spring-java/infra
    ```
+<<<<<<< HEAD
 3. **Rodar o script ec2_setup.sh**
 
    Certifique-se de que o terraform está instalado e, em seguida, inicie a aplicação com:
@@ -58,6 +59,9 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    ```
 
 4. **Para rodar o Terraform**
+=======
+3. **Para rodar o Terraform**
+>>>>>>> 9bb2cac79378c35c7f1465c1de3ff46731655cd9
    É necessário estar com as credentials da aws devidamente configuradas na sua máquina, isso implica em, entrar na pasta .aws e trocar as credencias com base no launcher aws.
    Depois, basta entrar na pasta infra do projeto e rodar o script de ec2_setup
       ```bash
@@ -65,22 +69,14 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    ```
    ```bash
    ./ec2_setup.sh  
-   ```
-
-   Caso ele não deixe executar, precisa ser dado a permissão de executar o arquivo .sh
-    ```bash
-    chmod +x ssh-login.sh
-    ```    
+   ```   
 ---
 
 ### 📝 Observação
 
-- Certifique-se de que o **Docker** está instalado corretamente em sua máquina para evitar problemas na execução.
-- Após rodar o Docker, você pode acessar a aplicação através do endereço fornecido no terminal.
+Para acessar o Swagger tem que pegar o Ip público da Ec2 e utilizar o protocolo http da seguinte forma
+
+http://IpPublico:8080/swagger-ui/index.html
 
 ---
 
-## 🔗 Links Úteis
-
-- [Documentação do Docker](https://docs.docker.com/get-started/)
-- [Guia de Instalação do Spring Framework](https://spring.io/guides)
