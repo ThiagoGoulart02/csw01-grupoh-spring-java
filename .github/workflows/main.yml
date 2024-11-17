@@ -22,17 +22,19 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Zip application
-        run: zip -j my-app.zip target/*.jar
+      - name: Install Serverless Framework
+        run: npm install -g serverless
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1  # Ajuste para a região correta se necessário
+          aws-region: us-east-1
 
       - name: Deploy to AWS Lambda
-        run: aws lambda update-function-code --function-name csw01-grupoh-spring-java --zip-file fileb://my-app.zip
-
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://${{ secrets.DB_HOST }}/postgres
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+        run: serverless deploy
