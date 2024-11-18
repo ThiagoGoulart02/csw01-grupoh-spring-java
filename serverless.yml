@@ -12,7 +12,7 @@ provider:
     SPRING_DATASOURCE_PASSWORD: ${env:SPRING_DATASOURCE_PASSWORD}
 
 package:
-  artifact: build/libs/spring-boot-serverless-api-1.0.0.jar
+  artifact: target/csw-0.0.1.jar
 
 functions:
   api:
