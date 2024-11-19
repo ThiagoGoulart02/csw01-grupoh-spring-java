@@ -50,6 +50,7 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    cd csw01-grupoh-spring-java
    ```
 3. **Rodar o passo a passo da pipeline de forma local**
+
    Utilize o serveless para dar deploy
 
 
