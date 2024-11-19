@@ -103,7 +103,7 @@ public class TicketService {
                             .stream()
                             .map(transaction -> ResponseTicketDTO.builder()
                                     .ticketId(transaction.getTicket().getTicketId())
-                                    .eventId(transaction.getTicket().getEvent().getEventId())
+                                     .eventId(transaction.getTicket().getEvent().getEventId())
                                     .tenantId(transaction.getTicket().getTenant().getTenantId())
                                     .originalPrice(transaction.getTicket().getOriginalPrice())
                                     .userId(transaction.getTicket().getUser().getUserId())
