@@ -25,3 +25,18 @@ functions:
       - http:
           path: /{proxy+}
           method: any
+
+resources:
+  Resources:
+    MyRDSInstance:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        DBInstanceIdentifier: spring-boot-serverless-db
+        AllocatedStorage: 20
+        DBInstanceClass: db.t3.micro
+        EngineVersion: "14.5"
+        PubliclyAccessible: true
+        Engine: postgres
+        MasterUsername: csww
+        MasterUserPassword: password
+        DBName: mydatabase
