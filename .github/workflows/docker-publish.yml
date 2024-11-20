@@ -66,6 +66,6 @@ jobs:
       # Step 10: Configurar o application.properties dinamicamente
       - name: Configure Application Properties
         run: |
-          echo "spring.datasource.url=jdbc:postgresql://$RDS_ENDPOINT:5432/mydatabase" >> src/main/resources/application.properties
+          echo "spring.datasource.url=jdbc:postgresql://$RDS_ENDPOINT:5432/mydatabasee" >> src/main/resources/application.properties
           echo "spring.datasource.username=csww" >> src/main/resources/application.properties
           echo "spring.datasource.password=password" >> src/main/resources/application.properties
