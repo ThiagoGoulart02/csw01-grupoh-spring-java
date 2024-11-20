@@ -47,30 +47,12 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    Após o clone, navegue até o diretório do projeto:
 
    ```bash
-   cd csw01-grupoh-spring-java/infra
+   cd csw01-grupoh-spring-java
    ```
-<<<<<<< HEAD
-3. **Rodar o script ec2_setup.sh**
+3. **Rodar o passo a passo da pipeline de forma local**
 
-   Certifique-se de que o terraform está instalado e, em seguida, inicie a aplicação com:
+   Utilize o serveless para dar deploy
 
-   ```bash
-   .\ec2_setup.sh
-   ```
-
-4. **Para rodar o Terraform**
-=======
-3. **Para rodar o Terraform**
->>>>>>> 9bb2cac79378c35c7f1465c1de3ff46731655cd9
-   É necessário estar com as credentials da aws devidamente configuradas na sua máquina, isso implica em, entrar na pasta .aws e trocar as credencias com base no launcher aws.
-   Depois, basta entrar na pasta infra do projeto e rodar o script de ec2_setup
-      ```bash
-   cd infra
-   ```
-   ```bash
-   ./ec2_setup.sh  
-   ```   
----
 
 ### 📝 Observação
 
