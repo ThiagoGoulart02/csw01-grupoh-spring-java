@@ -34,7 +34,7 @@ resources:
         DBInstanceIdentifier: spring-boot-serverless-db
         AllocatedStorage: 20
         DBInstanceClass: db.t3.micro
-        EngineVersion: "14.5"
+        EngineVersion: "14.10"
         PubliclyAccessible: true
         Engine: postgres
         MasterUsername: csww
