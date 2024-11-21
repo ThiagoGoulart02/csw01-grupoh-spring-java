@@ -8,18 +8,7 @@ provider:
   timeout: 30
   stackName: spring-boot-serverless-api-dev
   iam:
-    role:
-      statements:
-        - Effect: "Allow"
-          Action:
-            - "cloudformation:DescribeStacks"
-            - "cloudformation:CreateStack"
-            - "cloudformation:UpdateStack"
-            - "cloudformation:DeleteStack"
-            - "rds:*"
-            - "ec2:DescribeSubnets"
-            - "ec2:DescribeSecurityGroups"
-          Resource: "*"
+    role: ${env:AWS_ROLE}
   environment:
     SPRING_DATASOURCE_URL: ${env:SPRING_DATASOURCE_URL}
     SPRING_DATASOURCE_USERNAME: ${env:SPRING_DATASOURCE_USERNAME}
