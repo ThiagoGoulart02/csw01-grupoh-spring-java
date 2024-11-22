@@ -39,6 +39,12 @@ resources:
         EngineVersion: "14.10"
         PubliclyAccessible: true
         Engine: postgres
-        MasterUsername: csw
+        MasterUsername: csww
         MasterUserPassword: password
         DBName: mydatabasee
+  Outputs:
+    RDSInstanceEndpoint:
+      Value:
+        Fn::GetAtt: [MyRDSInstance, Endpoint.Address]
+      Export:
+        Name: MyRDSInstanceEndpoint
