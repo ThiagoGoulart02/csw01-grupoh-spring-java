@@ -1,6 +1,7 @@
 service: spring-boot-serverless-api
+
 plugins:
-  - serverless-offline
+  - serverless-offline # Plugin para testes locais
 
 provider:
   name: aws
@@ -8,14 +9,14 @@ provider:
   region: us-east-1
   stage: api
   timeout: 30
+  memorySize: 512
   stackName: spring-boot-serverless-api-dev
   iam:
     role: ${env:AWS_ROLE}
   environment:
-    SPRING_DATASOURCE_URL: ${env:SPRING_DATASOURCE_URL}
+    SPRING_DATASOURCE_URL: jdbc:postgresql://${env:RDS_ENDPOINT}:5432/mydatabasee
     SPRING_DATASOURCE_USERNAME: ${env:SPRING_DATASOURCE_USERNAME}
     SPRING_DATASOURCE_PASSWORD: ${env:SPRING_DATASOURCE_PASSWORD}
-
 
 package:
   artifact: target/csw-0.0.1.jar
