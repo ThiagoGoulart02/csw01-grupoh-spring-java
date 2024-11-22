@@ -1,10 +1,12 @@
 service: spring-boot-serverless-api
+plugins:
+  - serverless-offline
 
 provider:
   name: aws
   runtime: java17
   region: us-east-1
-  memorySize: 512
+  stage: api
   timeout: 30
   stackName: spring-boot-serverless-api-dev
   iam:
@@ -23,8 +25,9 @@ functions:
     handler: csw.t1.csw.LambdaHandler::handleRequest
     events:
       - http:
-          path: /{proxy+}
           method: any
+          path: /{proxy+}
+
 resources:
   Resources:
     MyRDSInstance:
@@ -36,6 +39,6 @@ resources:
         EngineVersion: "14.10"
         PubliclyAccessible: true
         Engine: postgres
-        MasterUsername: csww
+        MasterUsername: csw
         MasterUserPassword: password
         DBName: mydatabasee
