@@ -28,6 +28,8 @@ functions:
       - http:
           method: any
           path: /{proxy+}
+    dependsOn:
+      - MyRDSInstance
 
 resources:
   Resources:
