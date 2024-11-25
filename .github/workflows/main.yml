@@ -45,5 +45,4 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           AWS_ROLE: ${{ secrets.AWS_ROLE }}
         run: |
-          echo "AWS_ROLE=${{ secrets.AWS_ROLE }}" >> .env
           serverless deploy
