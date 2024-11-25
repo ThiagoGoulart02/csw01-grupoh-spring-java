@@ -5,7 +5,7 @@ plugins:
 
 provider:
   name: aws
-  runtime: java17
+  runtime: java21
   region: us-east-1
   stage: api
   timeout: 30
@@ -14,7 +14,7 @@ provider:
   iam:
     role: ${env:AWS_ROLE}
   environment:
-    SPRING_DATASOURCE_URL: jdbc:postgresql://${env:RDS_ENDPOINT}:5432/mydatabasee
+    SPRING_DATASOURCE_URL: jdbc:postgresql://spring-boot-serverless-db-new.cqzes9oh1wgy.us-east-1.rds.amazonaws.com:5432/mydatabasee
     SPRING_DATASOURCE_USERNAME: ${env:SPRING_DATASOURCE_USERNAME}
     SPRING_DATASOURCE_PASSWORD: ${env:SPRING_DATASOURCE_PASSWORD}
 
@@ -27,27 +27,4 @@ functions:
     events:
       - http:
           method: any
-          path: /{proxy+}
-    dependsOn:
-      - MyRDSInstance
-
-resources:
-  Resources:
-    MyRDSInstance:
-      Type: AWS::RDS::DBInstance
-      Properties:
-        DBInstanceIdentifier: spring-boot-serverless-db
-        AllocatedStorage: 20
-        DBInstanceClass: db.t3.micro
-        EngineVersion: "14.10"
-        PubliclyAccessible: true
-        Engine: postgres
-        MasterUsername: csww
-        MasterUserPassword: password
-        DBName: mydatabasee
-  Outputs:
-    RDSInstanceEndpoint:
-      Value:
-        Fn::GetAtt: [MyRDSInstance, Endpoint.Address]
-      Export:
-        Name: MyRDSInstanceEndpoint
+          path: /
