@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-
+      - test-infra
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -33,22 +33,6 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-      - name: Get RDS Endpoint
-        id: get-rds-endpoint
-        run: |
-          ENDPOINT=$(aws rds describe-db-instances \
-            --query "DBInstances[?DBInstanceIdentifier=='spring-boot-serverless-db'].Endpoint.Address" \
-            --output text \
-            --region us-east-1)
-          echo "DB_HOST=$ENDPOINT" >> $GITHUB_ENV
-
       - name: Deploy to AWS Lambda
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://${{ secrets.DB_HOST }}/postgres
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_ROLE: ${{ secrets.AWS_ROLE }}
         run: |
-          echo "AWS_ROLE=${{ secrets.AWS_ROLE }}" >> .env
           serverless deploy
