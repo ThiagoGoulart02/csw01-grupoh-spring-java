@@ -12,7 +12,7 @@ provider:
   memorySize: 512
   stackName: spring-boot-serverless-api-dev
   iam:
-    role: ${env:AWS_ROLE}
+    role: arn:aws:iam::930082020931:role/LabRole
   environment:
     SPRING_DATASOURCE_URL: jdbc:postgresql://spring-boot-serverless-db-new.cqzes9oh1wgy.us-east-1.rds.amazonaws.com:5432/mydatabasee
     SPRING_DATASOURCE_USERNAME: ${env:SPRING_DATASOURCE_USERNAME}
