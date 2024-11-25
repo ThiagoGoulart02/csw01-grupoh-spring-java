@@ -1,0 +1,5 @@
+com.fasterxml.jackson.datatype.jdk8.Jdk8Module
+com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+com.fasterxml.jackson.module.paramnames.ParameterNamesModule
+com.fasterxml.jackson.module.afterburner.AfterburnerModule
+

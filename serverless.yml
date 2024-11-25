@@ -1,22 +1,21 @@
 service: spring-boot-serverless-api
-
 plugins:
-  - serverless-offline # Plugin para testes locais
+  - serverless-offline
 
 provider:
   name: aws
-  runtime: java17
+  runtime: java21
   region: us-east-1
   stage: api
   timeout: 30
   memorySize: 512
   stackName: spring-boot-serverless-api-dev
   iam:
-    role: ${env:AWS_ROLE}
+    role: arn:aws:iam::930082020931:role/LabRole
   environment:
-    SPRING_DATASOURCE_URL: jdbc:postgresql://${env:RDS_ENDPOINT}:5432/mydatabasee
-    SPRING_DATASOURCE_USERNAME: ${env:SPRING_DATASOURCE_USERNAME}
-    SPRING_DATASOURCE_PASSWORD: ${env:SPRING_DATASOURCE_PASSWORD}
+    SPRING_DATASOURCE_URL: jdbc:postgresql://spring-boot-serverless-db-new.cqzes9oh1wgy.us-east-1.rds.amazonaws.com:5432/mydatabase
+    SPRING_DATASOURCE_USERNAME: csww
+    SPRING_DATASOURCE_PASSWORD: password
 
 package:
   artifact: target/csw-0.0.1.jar
@@ -27,27 +26,4 @@ functions:
     events:
       - http:
           method: any
-          path: /{proxy+}
-    dependsOn:
-      - MyRDSInstance
-
-resources:
-  Resources:
-    MyRDSInstance:
-      Type: AWS::RDS::DBInstance
-      Properties:
-        DBInstanceIdentifier: spring-boot-serverless-db
-        AllocatedStorage: 20
-        DBInstanceClass: db.t3.micro
-        EngineVersion: "14.10"
-        PubliclyAccessible: true
-        Engine: postgres
-        MasterUsername: csww
-        MasterUserPassword: password
-        DBName: mydatabasee
-  Outputs:
-    RDSInstanceEndpoint:
-      Value:
-        Fn::GetAtt: [MyRDSInstance, Endpoint.Address]
-      Export:
-        Name: MyRDSInstanceEndpoint
+          path: /
