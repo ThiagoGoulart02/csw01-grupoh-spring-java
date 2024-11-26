@@ -1,8 +1,5 @@
 service: spring-boot-serverless-api
 
-plugins:
-  - serverless-offline # Plugin para testes locais
-
 provider:
   name: aws
   runtime: java21
@@ -15,8 +12,8 @@ provider:
     role: arn:aws:iam::930082020931:role/LabRole
   environment:
     SPRING_DATASOURCE_URL: jdbc:postgresql://spring-boot-serverless-db-new.cqzes9oh1wgy.us-east-1.rds.amazonaws.com:5432/mydatabasee
-    SPRING_DATASOURCE_USERNAME: ${env:SPRING_DATASOURCE_USERNAME}
-    SPRING_DATASOURCE_PASSWORD: ${env:SPRING_DATASOURCE_PASSWORD}
+    SPRING_DATASOURCE_USERNAME: csww
+    SPRING_DATASOURCE_PASSWORD: password
 
 package:
   artifact: target/csw-0.0.1.jar
@@ -27,4 +24,4 @@ functions:
     events:
       - http:
           method: any
-          path: /
+          path: /{proxy+}

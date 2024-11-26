@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - test-infra
 
 jobs:
   build-and-deploy:
@@ -42,7 +41,6 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:postgresql://spring-boot-serverless-db-new.cqzes9oh1wgy.us-east-1.rds.amazonaws.com:5432/postgres
           SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           AWS_ROLE: ${{ secrets.AWS_ROLE }}
         run: |
           serverless deploy
