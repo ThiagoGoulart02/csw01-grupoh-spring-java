@@ -1,10 +1,9 @@
-
-
 # VPC
 resource "aws_vpc" "my_vpc" {
-  cidr_block = var.vpc_cidr
+  cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
+
   tags = {
     Name = "my-vpc"
   }
@@ -21,6 +20,17 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
+# Subnet Privada
+resource "aws_subnet" "private_subnet" {
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private-subnet"
+  }
+}
+
 # Internet Gateway
 resource "aws_internet_gateway" "my_igw" {
   vpc_id = aws_vpc.my_vpc.id
@@ -30,6 +40,26 @@ resource "aws_internet_gateway" "my_igw" {
   }
 }
 
+# Elastic IP para NAT Gateway
+resource "aws_eip" "nat" {
+  vpc = true
+
+  tags = {
+    Name = "nat-eip"
+  }
+}
+
+# NAT Gateway
+resource "aws_nat_gateway" "nat" {
+  subnet_id     = aws_subnet.public_subnet.id
+  allocation_id = aws_eip.nat.id
+
+  tags = {
+    Name = "nat-gateway"
+  }
+}
+
+# Route Table Pública
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.my_vpc.id
 
@@ -43,17 +73,30 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
-# Rota para Internet no Route Table
-resource "aws_route" "default_route" {
-  route_table_id         = aws_route_table.public_route_table.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.my_igw.id
+# Route Table Privada
+resource "aws_route_table" "private_route_table" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = {
+    Name = "private-route-table"
+  }
 }
 
-# Associar Subnet Pública ao Route Table
+# Associar Subnet Pública à Route Table
 resource "aws_route_table_association" "public_subnet_assoc" {
   subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.public_route_table.id
+}
+
+# Associar Subnet Privada à Route Table
+resource "aws_route_table_association" "private_subnet_assoc" {
+  subnet_id      = aws_subnet.private_subnet.id
+  route_table_id = aws_route_table.private_route_table.id
 }
 
 # Security Group para ECS
@@ -66,7 +109,7 @@ resource "aws_security_group" "ecs_security_group" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = [aws_vpc.my_vpc.cidr_block]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -89,8 +132,24 @@ resource "aws_security_group" "ecs_security_group" {
 }
 
 # ECS Cluster
-resource "aws_ecs_cluster" "my_cluster" {
-  name = "my-ecs-cluster"
+module "ecs_cluster" {
+  source  = "terraform-aws-modules/ecs/aws"
+
+  cluster_name = "ecs-dev"
+
+  fargate_capacity_providers = {
+    FARGATE = {
+      default_capacity_provider_strategy = {
+        weight = 50
+        base   = 20
+      }
+    }
+    FARGATE_SPOT = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
+  }
 }
 
 # Task Definition para o Backend
@@ -114,13 +173,6 @@ resource "aws_ecs_task_definition" "app_task" {
       hostPort      = 8080
       protocol      = "tcp"
     }]
-    healthCheck = {
-      command     = ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
-      interval    = 30
-      timeout     = 5
-      retries     = 3
-      startPeriod = 60
-    }
     environment = [
       { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://postgres:5432/mydatabase" },
       { name = "SPRING_DATASOURCE_USERNAME", value = "admin" },
@@ -161,7 +213,7 @@ resource "aws_ecs_task_definition" "db_task" {
 # ECS Service para o Backend
 resource "aws_ecs_service" "app_service" {
   name            = "spring-boot-service"
-  cluster         = aws_ecs_cluster.my_cluster.id
+  cluster         = module.ecs_cluster.cluster_id
   task_definition = aws_ecs_task_definition.app_task.arn
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -176,38 +228,14 @@ resource "aws_ecs_service" "app_service" {
 # ECS Service para o Banco de Dados
 resource "aws_ecs_service" "db_service" {
   name            = "postgres-service"
-  cluster         = aws_ecs_cluster.my_cluster.id
+  cluster         = module.ecs_cluster.cluster_id
   task_definition = aws_ecs_task_definition.db_task.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = [aws_subnet.public_subnet.id]
+    subnets          = [aws_subnet.private_subnet.id]
     security_groups  = [aws_security_group.ecs_security_group.id]
     assign_public_ip = false
   }
-}
-
-# Outputs
-output "vpc_id" {
-  value = aws_vpc.my_vpc.id
-}
-
-output "app_service_name" {
-  value = aws_ecs_service.app_service.name
-}
-
-output "db_service_name" {
-  value = aws_ecs_service.db_service.name
-}
-
-data "aws_network_interface" "app_network_interface" {
-  filter {
-    name   = "group-id"
-    values = [aws_security_group.ecs_security_group.id]
-  }
-}
-
-output "app_public_ip" {
-  value = data.aws_network_interface.app_network_interface.association.public_ip
 }

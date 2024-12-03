@@ -13,13 +13,10 @@ DB_IMAGE_NAME="postgres"
 echo "Realizando login no Amazon ECR..."
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-# Criar repositórios no ECR (se ainda não existirem)
 echo "Criando repositórios no ECR..."
 aws ecr create-repository --repository-name $BACKEND_IMAGE_NAME || echo "Repositório $BACKEND_IMAGE_NAME já existe"
 aws ecr create-repository --repository-name $DB_IMAGE_NAME || echo "Repositório $DB_IMAGE_NAME já existe"
 
-# Compilar o Projeto Backend com Maven
-# Navegar até o diretório raiz do projeto onde está o pom.xml
 cd ..
 
 # Compilar o Projeto Backend com Maven
@@ -35,11 +32,6 @@ docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_IMAGE_NAM
 echo "Construindo e enviando a imagem Docker do Banco de Dados..."
 docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DB_IMAGE_NAME:latest -f Dockerfile.db .
 docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DB_IMAGE_NAME:latest
-
-# Atualizar variáveis no Terraform (opcional, caso as imagens sejam dinâmicas)
-echo "Atualizando o arquivo terraform.tfvars..."
-echo "app_image=\"$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_IMAGE_NAME:latest\"" > terraform.tfvars
-echo "db_image=\"$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DB_IMAGE_NAME:latest\"" >> terraform.tfvars
 
 # Aplicar configurações no Terraform (infraestrutura ECS e rede)
 cd infra
