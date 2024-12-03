@@ -1,170 +1,197 @@
-provider "aws" {
-  region = "us-east-1"
-}
 
-resource "aws_instance" "ec2" {
-  ami                    = "ami-0866a3c8686eaeeba"
-  instance_type          = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.api_access.id]
-  key_name               = aws_key_pair.key_pair.key_name
+
+# VPC
+resource "aws_vpc" "my_vpc" {
+  cidr_block = var.vpc_cidr
+
   tags = {
-    Name = "ec2"
+    Name = "my-vpc"
   }
-  user_data = <<-EOF
-              #!/bin/bash
-              # Update package index
-              sudo apt-get update -y
-              sudo ufw allow 8080
-
-              # Install Docker
-
-              sudo apt-get update
-              sudo apt-get install ca-certificates curl
-              sudo install -m 0755 -d /etc/apt/keyrings
-              sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-              sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-              # Add the repository to Apt sources:
-              echo \
-                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-                $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-                sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-              sudo apt-get update
-
-              # Install Docker Engine
-              sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-
-              # Start Docker service
-              sudo systemctl start docker
-              sudo systemctl enable docker
-
-              # Clone github
-              mkdir repo
-              cd repo
-              git clone https://github.com/ThiagoGoulart02/csw01-grupoh-spring-java.git
-
-              # Enter repo
-              cd csw01-grupoh-spring-java
-              cd docker
-
-              # Build Docker image
-              sudo docker compose up -d
-
-
-              EOF
-
 }
-resource "aws_security_group" "api_access" {
-  name        = "API-security-group-T1"
-  description = "Security group para permitir SSH, HTTP e HTTPS"
 
-  # Regra de entrada para SSH (porta 22)
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+# Subnet Pública
+resource "aws_subnet" "public_subnet" {
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = var.public_subnet_cidr
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "public-subnet"
   }
+}
 
-  # Regra de entrada para HTTP (porta 80)
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+# Internet Gateway
+resource "aws_internet_gateway" "my_igw" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  tags = {
+    Name = "my-internet-gateway"
   }
+}
 
-  # Regra de entrada para HTTPS (porta 443)
-  ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+# Route Table para a Subnet Pública
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  tags = {
+    Name = "public-route-table"
   }
+}
+
+# Rota para Internet no Route Table
+resource "aws_route" "default_route" {
+  route_table_id         = aws_route_table.public_route_table.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.my_igw.id
+}
+
+# Associar Subnet Pública ao Route Table
+resource "aws_route_table_association" "public_subnet_assoc" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+# Security Group para ECS
+resource "aws_security_group" "ecs_security_group" {
+  name        = "ecs-security-group"
+  description = "Security group for ECS"
+  vpc_id      = aws_vpc.my_vpc.id
 
   ingress {
-    description = "api port"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [aws_vpc.my_vpc.cidr_block]
   }
 
   ingress {
-    description = "pg port"
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [aws_vpc.my_vpc.cidr_block]
   }
 
-  ingress {
-    description = "pgAdmin port"
-    from_port   = 5050
-    to_port     = 5050
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Regra de saída que permite todo o tráfego
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-resource "aws_s3_bucket" "my_bucket" {
-  bucket = "csw01-grupoh-spring-java"
 
   tags = {
-    Name        = "S3"
-    Environment = "Production"
+    Name = "ecs-security-group"
   }
 }
 
-# Exemplo de política de bucket para permitir acesso público de leitura (ajuste conforme necessário)
-resource "aws_s3_bucket_policy" "bucket_policy" {
-  bucket = aws_s3_bucket.my_bucket.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = "s3:GetObject"
-        Resource  = "${aws_s3_bucket.my_bucket.arn}/*"
-      }
+# ECS Cluster
+resource "aws_ecs_cluster" "my_cluster" {
+  name = "my-ecs-cluster"
+}
+
+# Task Definition para o Backend
+resource "aws_ecs_task_definition" "app_task" {
+  family                   = "spring-boot-app"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+
+  execution_role_arn = "arn:aws:iam::930082020931:role/LabRole"
+
+  container_definitions = jsonencode([{
+    name        = "spring-boot-app"
+    image       = var.app_image
+    memory      = 512
+    cpu         = 256
+    essential   = true
+    portMappings = [{
+      containerPort = 8080
+      hostPort      = 8080
+      protocol      = "tcp"
+    }]
+    healthCheck = {
+      command     = ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      interval    = 30
+      timeout     = 5
+      retries     = 3
+      startPeriod = 60
+    }
+    environment = [
+      { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://postgres:5432/mydatabase" },
+      { name = "SPRING_DATASOURCE_USERNAME", value = "admin" },
+      { name = "SPRING_DATASOURCE_PASSWORD", value = "admin" }
     ]
-  })
+  }])
 }
 
-# Criação da ssh keypair diretamente no terraform
-resource "tls_private_key" "my_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+# Task Definition para o Banco de Dados
+resource "aws_ecs_task_definition" "db_task" {
+  family                   = "postgres-db"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+
+  execution_role_arn = "arn:aws:iam::930082020931:role/LabRole"
+
+  container_definitions = jsonencode([{
+    name        = "postgres"
+    image       = var.db_image
+    memory      = 512
+    cpu         = 256
+    essential   = true
+    portMappings = [{
+      containerPort = 5432
+      hostPort      = 5432
+      protocol      = "tcp"
+    }]
+    environment = [
+      { name = "POSTGRES_USER", value = "admin" },
+      { name = "POSTGRES_PASSWORD", value = "admin" },
+      { name = "POSTGRES_DB", value = "mydatabase" }
+    ]
+  }])
 }
 
-resource "aws_key_pair" "key_pair" {
-  key_name   = "ec2-key"
-  public_key = tls_private_key.my_key.public_key_openssh
+# ECS Service para o Backend
+resource "aws_ecs_service" "app_service" {
+  name            = "spring-boot-service"
+  cluster         = aws_ecs_cluster.my_cluster.id
+  task_definition = aws_ecs_task_definition.app_task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = [aws_subnet.public_subnet.id]
+    security_groups  = [aws_security_group.ecs_security_group.id]
+    assign_public_ip = true
+  }
 }
 
-resource "local_file" "my_key_pem" {
-  filename        = "${path.module}/ec2-key.pem"
-  content         = tls_private_key.my_key.private_key_pem
-  file_permission = "0400"
+# ECS Service para o Banco de Dados
+resource "aws_ecs_service" "db_service" {
+  name            = "postgres-service"
+  cluster         = aws_ecs_cluster.my_cluster.id
+  task_definition = aws_ecs_task_definition.db_task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = [aws_subnet.public_subnet.id]
+    security_groups  = [aws_security_group.ecs_security_group.id]
+    assign_public_ip = false
+  }
 }
 
-output "private_key_pem" {
-  value     = tls_private_key.my_key.private_key_pem
-  sensitive = true
+# Outputs
+output "vpc_id" {
+  value = aws_vpc.my_vpc.id
 }
 
-output "aws_instance_public_ip" {
-  value = aws_instance.ec2.public_ip
+output "app_service_name" {
+  value = aws_ecs_service.app_service.name
+}
+
+output "db_service_name" {
+  value = aws_ecs_service.db_service.name
 }
