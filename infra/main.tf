@@ -1,241 +1,39 @@
-# VPC
-resource "aws_vpc" "my_vpc" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_support   = true
-  enable_dns_hostnames = true
 
-  tags = {
-    Name = "my-vpc"
-  }
-}
+# EKS Cluster
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.0"
 
-# Subnet Pública
-resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.my_vpc.id
-  cidr_block              = var.public_subnet_cidr
-  map_public_ip_on_launch = true
+  cluster_name    = "my-eks-cluster"
+  cluster_version = "1.24"
 
-  tags = {
-    Name = "public-subnet"
-  }
-}
+  vpc_id                   = module.vpc.vpc_id
+  subnet_ids               = module.vpc.private_subnets
+  control_plane_subnet_ids = module.vpc.public_subnets
 
-# Subnet Privada
-resource "aws_subnet" "private_subnet" {
-  vpc_id                  = aws_vpc.my_vpc.id
-  cidr_block              = "10.0.2.0/24"
-  map_public_ip_on_launch = false
-
-  tags = {
-    Name = "private-subnet"
-  }
-}
-
-# Internet Gateway
-resource "aws_internet_gateway" "my_igw" {
-  vpc_id = aws_vpc.my_vpc.id
-
-  tags = {
-    Name = "my-internet-gateway"
-  }
-}
-
-# Elastic IP para NAT Gateway
-resource "aws_eip" "nat" {
-  vpc = true
-
-  tags = {
-    Name = "nat-eip"
-  }
-}
-
-# NAT Gateway
-resource "aws_nat_gateway" "nat" {
-  subnet_id     = aws_subnet.public_subnet.id
-  allocation_id = aws_eip.nat.id
-
-  tags = {
-    Name = "nat-gateway"
-  }
-}
-
-# Route Table Pública
-resource "aws_route_table" "public_route_table" {
-  vpc_id = aws_vpc.my_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.my_igw.id
+  eks_managed_node_group_defaults = {
+    instance_types = ["t3.medium"]
   }
 
-  tags = {
-    Name = "public-route-table"
-  }
-}
+  eks_managed_node_groups = {
+    default = {
+      desired_size = 2
+      max_size     = 3
+      min_size     = 1
 
-# Route Table Privada
-resource "aws_route_table" "private_route_table" {
-  vpc_id = aws_vpc.my_vpc.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat.id
-  }
-
-  tags = {
-    Name = "private-route-table"
-  }
-}
-
-# Associar Subnet Pública à Route Table
-resource "aws_route_table_association" "public_subnet_assoc" {
-  subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = aws_route_table.public_route_table.id
-}
-
-# Associar Subnet Privada à Route Table
-resource "aws_route_table_association" "private_subnet_assoc" {
-  subnet_id      = aws_subnet.private_subnet.id
-  route_table_id = aws_route_table.private_route_table.id
-}
-
-# Security Group para ECS
-resource "aws_security_group" "ecs_security_group" {
-  name        = "ecs-security-group"
-  description = "Security group for ECS"
-  vpc_id      = aws_vpc.my_vpc.id
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.my_vpc.cidr_block]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "ecs-security-group"
-  }
-}
-
-# ECS Cluster
-module "ecs_cluster" {
-  source  = "terraform-aws-modules/ecs/aws"
-
-  cluster_name = "ecs-dev"
-
-  fargate_capacity_providers = {
-    FARGATE = {
-      default_capacity_provider_strategy = {
-        weight = 50
-        base   = 20
-      }
-    }
-    FARGATE_SPOT = {
-      default_capacity_provider_strategy = {
-        weight = 50
-      }
+      ami_type = "AL2023_x86_64_STANDARD"
     }
   }
-}
 
-# Task Definition para o Backend
-resource "aws_ecs_task_definition" "app_task" {
-  family                   = "spring-boot-app"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = "256"
-  memory                   = "512"
-
-  execution_role_arn = "arn:aws:iam::930082020931:role/LabRole"
-
-  container_definitions = jsonencode([{
-    name        = "spring-boot-app"
-    image       = var.app_image
-    memory      = 512
-    cpu         = 256
-    essential   = true
-    portMappings = [{
-      containerPort = 8080
-      hostPort      = 8080
-      protocol      = "tcp"
-    }]
-    environment = [
-      { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://postgres:5432/mydatabase" },
-      { name = "SPRING_DATASOURCE_USERNAME", value = "admin" },
-      { name = "SPRING_DATASOURCE_PASSWORD", value = "admin" }
-    ]
-  }])
-}
-
-# Task Definition para o Banco de Dados
-resource "aws_ecs_task_definition" "db_task" {
-  family                   = "postgres-db"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = "256"
-  memory                   = "512"
-
-  execution_role_arn = "arn:aws:iam::930082020931:role/LabRole"
-
-  container_definitions = jsonencode([{
-    name        = "postgres"
-    image       = var.db_image
-    memory      = 512
-    cpu         = 256
-    essential   = true
-    portMappings = [{
-      containerPort = 5432
-      hostPort      = 5432
-      protocol      = "tcp"
-    }]
-    environment = [
-      { name = "POSTGRES_USER", value = "admin" },
-      { name = "POSTGRES_PASSWORD", value = "admin" },
-      { name = "POSTGRES_DB", value = "mydatabase" }
-    ]
-  }])
-}
-
-# ECS Service para o Backend
-resource "aws_ecs_service" "app_service" {
-  name            = "spring-boot-service"
-  cluster         = module.ecs_cluster.cluster_id
-  task_definition = aws_ecs_task_definition.app_task.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    subnets          = [aws_subnet.public_subnet.id]
-    security_groups  = [aws_security_group.ecs_security_group.id]
-    assign_public_ip = true
+  tags = {
+    Environment = "dev"
   }
 }
 
-# ECS Service para o Banco de Dados
-resource "aws_ecs_service" "db_service" {
-  name            = "postgres-service"
-  cluster         = module.ecs_cluster.cluster_id
-  task_definition = aws_ecs_task_definition.db_task.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
+output "eks_cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
 
-  network_configuration {
-    subnets          = [aws_subnet.private_subnet.id]
-    security_groups  = [aws_security_group.ecs_security_group.id]
-    assign_public_ip = false
-  }
+output "eks_cluster_name" {
+  value = module.eks.cluster_name
 }

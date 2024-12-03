@@ -13,30 +13,29 @@ DB_IMAGE_NAME="postgres"
 echo "Realizando login no Amazon ECR..."
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
+# Criando repositórios no ECR
 echo "Criando repositórios no ECR..."
 aws ecr create-repository --repository-name $BACKEND_IMAGE_NAME || echo "Repositório $BACKEND_IMAGE_NAME já existe"
 aws ecr create-repository --repository-name $DB_IMAGE_NAME || echo "Repositório $DB_IMAGE_NAME já existe"
 
+# Construindo e enviando as imagens Docker
+echo "Construindo e enviando as imagens Docker para o ECR..."
 cd ..
 
-# Compilar o Projeto Backend com Maven
-echo "Compilando o projeto com Maven..."
-mvn clean package -DskipTests
-
-# Construir e enviar a imagem do Backend para o ECR
-echo "Construindo e enviando a imagem Docker do Backend..."
+# Backend
+echo "Construindo e enviando a imagem do Backend..."
 docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_IMAGE_NAME:latest .
 docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_IMAGE_NAME:latest
 
-# Construir e enviar a imagem do Banco de Dados para o ECR
-echo "Construindo e enviando a imagem Docker do Banco de Dados..."
+# Banco de Dados
+echo "Construindo e enviando a imagem do Banco de Dados..."
 docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DB_IMAGE_NAME:latest -f Dockerfile.db .
 docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DB_IMAGE_NAME:latest
 
-# Aplicar configurações no Terraform (infraestrutura ECS e rede)
+# Aplicando configurações no Terraform
+echo "Aplicando configurações no Terraform..."
 cd infra
 
-echo "Criando a infraestrutura no Terraform..."
 terraform init
 terraform apply -auto-approve
 
