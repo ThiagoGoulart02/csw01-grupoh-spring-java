@@ -3,7 +3,8 @@
 # VPC
 resource "aws_vpc" "my_vpc" {
   cidr_block = var.vpc_cidr
-
+  enable_dns_support   = true
+  enable_dns_hostnames = true
   tags = {
     Name = "my-vpc"
   }
@@ -29,9 +30,13 @@ resource "aws_internet_gateway" "my_igw" {
   }
 }
 
-# Route Table para a Subnet Pública
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.my_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.my_igw.id
+  }
 
   tags = {
     Name = "public-route-table"
@@ -194,4 +199,15 @@ output "app_service_name" {
 
 output "db_service_name" {
   value = aws_ecs_service.db_service.name
+}
+
+data "aws_network_interface" "app_network_interface" {
+  filter {
+    name   = "group-id"
+    values = [aws_security_group.ecs_security_group.id]
+  }
+}
+
+output "app_public_ip" {
+  value = data.aws_network_interface.app_network_interface.association.public_ip
 }
