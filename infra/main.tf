@@ -42,14 +42,6 @@ resource "aws_route_table" "public_route_table" {
     Name = "public-route-table"
   }
 }
-
-# Rota para Internet no Route Table
-resource "aws_route" "default_route" {
-  route_table_id         = aws_route_table.public_route_table.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.my_igw.id
-}
-
 # Associar Subnet Pública ao Route Table
 resource "aws_route_table_association" "public_subnet_assoc" {
   subnet_id      = aws_subnet.public_subnet.id
@@ -199,15 +191,4 @@ output "app_service_name" {
 
 output "db_service_name" {
   value = aws_ecs_service.db_service.name
-}
-
-data "aws_network_interface" "app_network_interface" {
-  filter {
-    name   = "group-id"
-    values = [aws_security_group.ecs_security_group.id]
-  }
-}
-
-output "app_public_ip" {
-  value = data.aws_network_interface.app_network_interface.association.public_ip
 }
