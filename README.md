@@ -47,16 +47,33 @@ Siga os passos abaixo para rodar a aplicação localmente usando Docker.
    Após o clone, navegue até o diretório do projeto:
 
    ```bash
-   cd csw01-grupoh-spring-java
+   cd csw01-grupoh-spring-java/infra
    ```
-3. **Rodar o passo a passo da pipeline de forma local**
+3. **Subir a ECS pelo terraform**
 
-   Utilize o serveless para dar deploy
+   Porém antes deve ir no arquivo variables.tf e alterar a seguinte parte
+   arn:aws:iam::{AWS_ID}:role/LabRole
 
+   
+   Esse local deve ser trocado pelo seu iam_role:
+   ```
+   variable "execution_role_arn" {
+     description = ""
+     type = string
+     default = "arn:aws:iam::930082020931:role/LabRole"
+   }
+   ```
+
+   Após isso basta rodar os comandos do terraform
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply -auto-approve
+   ```
 
 ### 📝 Observação
 
-Para acessar o Swagger tem que pegar o Ip público da Ec2 e utilizar o protocolo http da seguinte forma
+Para acessar o Swagger tem que pegar o Ip público da aplicação no serviço do ECS e utilizar o protocolo http da seguinte forma
 
 http://IpPublico:8080/swagger-ui/index.html
 
