@@ -93,7 +93,7 @@ resource "aws_ecs_task_definition" "app_task" {
   cpu                      = "256"
   memory                   = "512"
 
-  execution_role_arn = "arn:aws:iam::930082020931:role/LabRole"
+  execution_role_arn = var.execution_role_arn
 
   container_definitions = jsonencode([{
     name        = "spring-boot-app"
@@ -129,7 +129,7 @@ resource "aws_ecs_task_definition" "db_task" {
   cpu                      = "256"
   memory                   = "512"
 
-  execution_role_arn = "arn:aws:iam::930082020931:role/LabRole"
+  execution_role_arn = var.execution_role_arn
 
   container_definitions = jsonencode([{
     name        = "postgres"
@@ -176,7 +176,7 @@ resource "aws_ecs_service" "db_service" {
   network_configuration {
     subnets          = [aws_subnet.public_subnet.id]
     security_groups  = [aws_security_group.ecs_security_group.id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 }
 

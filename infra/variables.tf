@@ -13,11 +13,17 @@ variable "public_subnet_cidr" {
 variable "app_image" {
   description = "Imagem do backend para o ECS (registrada no ECR)"
   type        = string
-  default     = "930082020931.dkr.ecr.us-east-1.amazonaws.com/meu-backend:latest"
+  default     = "rodrigolopesmichalski/backend:latest"
 }
 
 variable "db_image" {
   description = "Imagem do banco de dados para o ECS (registrada no ECR)"
   type        = string
-  default     = "930082020931.dkr.ecr.us-east-1.amazonaws.com/meu-postgres:latest"
+  default     = "rodrigolopesmichalski/postgres:latest"
+}
+
+variable "execution_role_arn" {
+  description = ""
+  type = string
+  default = "arn:aws:iam::930082020931:role/LabRole"
 }
