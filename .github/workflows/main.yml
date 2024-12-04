@@ -25,6 +25,9 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@3
 
+      - name: Install Serverless Offline Plugin
+        run: serverless plugin install -n serverless-offline
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -33,22 +36,11 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-      - name: Get RDS Endpoint
-        id: get-rds-endpoint
-        run: |
-          ENDPOINT=$(aws rds describe-db-instances \
-            --query "DBInstances[?DBInstanceIdentifier=='spring-boot-serverless-db'].Endpoint.Address" \
-            --output text \
-            --region us-east-1)
-          echo "DB_HOST=$ENDPOINT" >> $GITHUB_ENV
-
       - name: Deploy to AWS Lambda
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://${{ secrets.DB_HOST }}/postgres
+          SPRING_DATASOURCE_URL: jdbc:postgresql://spring-boot-serverless-db-new.cqzes9oh1wgy.us-east-1.rds.amazonaws.com:5432/postgres
           SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           AWS_ROLE: ${{ secrets.AWS_ROLE }}
         run: |
-          echo "AWS_ROLE=${{ secrets.AWS_ROLE }}" >> .env
           serverless deploy
