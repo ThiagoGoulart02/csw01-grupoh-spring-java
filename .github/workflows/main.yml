@@ -22,12 +22,6 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Install Serverless Framework
-        run: npm install -g serverless@3
-
-      - name: Install Serverless Offline Plugin
-        run: serverless plugin install -n serverless-offline
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -43,4 +37,9 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
           AWS_ROLE: ${{ secrets.AWS_ROLE }}
         run: |
-          serverless deploy
+          terraform init
+          terraform apply -auto-approve \
+            -var "db_url=${{ secrets.SPRING_DATASOURCE_URL }}" \
+            -var "db_user=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
+            -var "db_password=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" \
+            -var "aws_role=${{ secrets.AWS_ROLE }}"
